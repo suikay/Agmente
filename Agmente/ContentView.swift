@@ -26,8 +26,18 @@ struct ContentView: View {
         .sheet(item: $serverToEdit, content: editServerSheet)
         .sheet(isPresented: $showingSettings, content: settingsSheet)
         .onChange(of: scenePhase) { _, newPhase in
-            if newPhase == .active {
+            switch newPhase {
+            case .active:
+                // App returned to foreground: resume connection
                 model.resumeConnectionIfNeeded()
+            case .background:
+                // App entering background: start background task to extend execution time
+                model.handleDidEnterBackground()
+            case .inactive:
+                // App is about to enter inactive state (e.g., during phone call or lock screen)
+                break
+            @unknown default:
+                break
             }
         }
         .onChange(of: model.selectedServerId) { oldServerId, newServerId in

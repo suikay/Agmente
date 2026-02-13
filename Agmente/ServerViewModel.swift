@@ -1219,6 +1219,21 @@ final class ServerViewModel: ObservableObject, Identifiable, ServerViewModelProt
     }
 }
 
+// MARK: - Lifecycle
+
+extension ServerViewModel {
+    /// Handles app entering background state.
+    /// Prepares the server view model for potential disconnection while app is in background.
+    func handleDidEnterBackground() {
+        // Log background transition for debugging
+        appendClosure("Server entering background, connection may be suspended by OS")
+
+        // The WebSocket connection will be maintained as long as iOS allows
+        // When the app returns to foreground, the connection will be automatically
+        // resumed if it's still valid, or re-established if needed
+    }
+}
+
 // MARK: - ACPSessionEventDelegate
 
 extension ServerViewModel: ACPSessionEventDelegate {

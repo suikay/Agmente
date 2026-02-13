@@ -223,6 +223,9 @@ final class AppViewModel: ObservableObject, ACPClientManagerDelegate, ACPSession
     private let codexSessionLoggingKey = "Agmente.codexSessionLoggingEnabled"
     private let serverLifecycleController: ServerLifecycleController
 
+    /// Background task manager for handling app background transitions
+    private let backgroundTaskManager = BackgroundTaskManager()
+
     private func debugLog(_ message: String) {
         guard devModeEnabled else { return }
         append("[debug] \(message)")
@@ -1561,6 +1564,40 @@ final class AppViewModel: ObservableObject, ACPClientManagerDelegate, ACPSession
             defer { self.resumeRefreshTask = nil }
             await self.refreshSessionsAfterResume()
         }
+    }
+
+    /// Handles the app entering background state.
+    /// Starts a background task to extend execution time and prepares for potential disconnection.
+    func handleDidEnterBackground() {
+        debugLog("App entering background")
+
+        // Begin background task to extend execution time
+        // This gives the app additional time (up to ~3 minutes) to complete ongoing operations
+        backgroundTaskManager.beginBackgroundTask { [weak self] in
+            guard let self else { return }
+            self.debugLog("Background task expiring, saving session state")
+
+            // Save current session state before the system terminates the background task
+            Task { @MainActor [weak self] in
+                await self?.saveSessionStateBeforeBackgroundTermination()
+            }
+        }
+
+        // Notify server view model about background transition
+        selectedServerViewModelAny?.handleDidEnterBackground()
+
+        debugLog("Background task started, remaining time: \(backgroundTaskManager.remainingTime)s")
+    }
+
+    /// Saves the current session state before background task termination.
+    /// This allows the app to restore the session properly when returning to foreground.
+    private func saveSessionStateBeforeBackgroundTermination() async {
+        // The current session state is already persisted via Core Data
+        // This method is a hook for any additional cleanup or state saving needed
+        debugLog("Session state saved for background termination")
+
+        // End the background task after saving state
+        backgroundTaskManager.endCurrentTask()
     }
 
     func initializeAndWait() async -> Bool {

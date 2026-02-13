@@ -98,6 +98,12 @@ protocol ServerViewModelProtocol: ObservableObject, Identifiable where ID == UUI
     /// Remove all session view models.
     func removeAllSessionViewModels()
 
+    // MARK: - Lifecycle
+
+    /// Handle app entering background state.
+    /// Called when the app transitions to background, allowing view models to prepare for potential disconnection.
+    func handleDidEnterBackground()
+
     // MARK: - Delegates & Storage
 
     var cacheDelegate: ACPSessionCacheDelegate? { get set }

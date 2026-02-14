@@ -6,6 +6,12 @@ struct SessionSidebarView: View {
     @ObservedObject var sessionViewModel: ACPSessionViewModel
     var showConnectionAndInit: Bool = true
 
+    @State private var showingRenameSheet = false
+    @State private var sessionToRename: (title: String, id: String)?
+    @State private var showingDeleteConfirm = false
+    @State private var sessionToDelete: (title: String, id: String)?
+    @State private var newSessionName = ""
+
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
@@ -17,6 +23,23 @@ struct SessionSidebarView: View {
                 logSection
             }
             .padding()
+        }
+        .sheet(isPresented: $showingRenameSheet) {
+            renameSessionSheet
+        }
+        .confirmationDialog(
+            "Delete Session?",
+            isPresented: $showingDeleteConfirm,
+            presenting: sessionToDelete?.title ?? ""
+        ) {
+            Button("Delete", role: .destructive) {
+                if let sessionId = sessionToDelete?.id {
+                    model.deleteSession(sessionId)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will permanently delete \"\(sessionToDelete?.title ?? "")\" and its chat history.")
         }
     }
 }
@@ -150,17 +173,24 @@ private extension SessionSidebarView {
             } else {
                 VStack(spacing: 8) {
                     ForEach(serverViewModel.sessionSummaries) { session in
-                        Button {
+                        SessionCard(
+                            title: session.title ?? "New Chat",
+                            subtitle: "Session",
+                            isSelected: serverViewModel.selectedSessionId == session.id,
+                            isDimmed: model.connectionState != .connected,
+                            onRename: {
+                                showingRenameSheet = true
+                                sessionToRename = (title: session.title ?? "New Chat", id: session.id)
+                                newSessionName = session.title ?? ""
+                            },
+                            onDelete: {
+                                showingDeleteConfirm = true
+                                sessionToDelete = (title: session.title ?? "New Chat", id: session.id)
+                            }
+                        )
+                        .onTapGesture {
                             model.openSession(session.id)
-                        } label: {
-                            SessionCard(
-                                title: session.title ?? "New Chat",
-                                subtitle: "Session",
-                                isSelected: serverViewModel.selectedSessionId == session.id,
-                                isDimmed: model.connectionState != .connected
-                            )
                         }
-                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -193,5 +223,36 @@ private extension SessionSidebarView {
             .frame(maxHeight: 220)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    var renameSessionSheet: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("Session Name", text: $newSessionName)
+                        .textInputAutocapitalization(.sentences)
+                }
+            }
+            .navigationTitle(sessionToRename?.title ?? "Rename Session")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        showingRenameSheet = false
+                        newSessionName = ""
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        if let sessionId = sessionToRename?.id, !newSessionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            model.renameSession(sessionId, newName: newSessionName)
+                            showingRenameSheet = false
+                            newSessionName = ""
+                        }
+                    }
+                    .disabled(newSessionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                }
+            }
+        }
     }
 }

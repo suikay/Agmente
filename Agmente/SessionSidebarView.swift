@@ -126,6 +126,7 @@ private extension SessionSidebarView {
                 } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.headline)
+                        .foregroundStyle(.primary)
                 }
                 .buttonStyle(.plain)
                 .disabled(model.selectedServerId == nil || model.connectionState != .connected)

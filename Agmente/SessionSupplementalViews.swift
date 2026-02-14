@@ -456,6 +456,8 @@ struct SessionCard: View {
     let subtitle: String
     let isSelected: Bool
     let isDimmed: Bool
+    let onRename: (() -> Void)?
+    let onDelete: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
@@ -476,6 +478,23 @@ struct SessionCard: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 1.5)
         )
+        .contextMenu {
+            if let onRename = onRename, !isDimmed {
+                Button {
+                    onRename()
+                } label: {
+                    Label("Rename", systemImage: "pencil")
+                }
+            }
+            if let onDelete = onDelete, !isDimmed {
+                Button(role: .destructive) {
+                    onDelete()
+                } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            }
+        }
+        }
     }
 }
 

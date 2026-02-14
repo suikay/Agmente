@@ -939,6 +939,12 @@ final class AppViewModel: ObservableObject, ACPClientManagerDelegate, ACPSession
         serverViewModel.deleteSession(sessionId)
     }
 
+    /// Rename a session.
+    func renameSession(_ sessionId: String, newName: String) {
+        guard let serverViewModel = selectedServerViewModel else { return }
+        serverViewModel.renameSession(sessionId, newName: newName)
+    }
+
     private func persistActiveServerConfig() {
         guard let serverId = selectedServerId,
               let index = servers.firstIndex(where: { $0.id == serverId }) else { return }

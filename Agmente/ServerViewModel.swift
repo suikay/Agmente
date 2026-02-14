@@ -847,6 +847,21 @@ final class ServerViewModel: ObservableObject, Identifiable, ServerViewModelProt
         storage?.deleteSession(sessionId: sessionId, forServerId: id)
     }
 
+    /// Rename a session.
+    func renameSession(_ sessionId: String, newName: String) {
+        if let index = sessionSummaries.firstIndex(where: { $0.id == sessionId }) {
+            let existing = sessionSummaries[index]
+            let updated = SessionSummary(
+                id: existing.id,
+                title: newName,
+                cwd: existing.cwd,
+                updatedAt: Date()
+            )
+            sessionSummaries[index] = updated
+            setSessionSummaries(sessionSummaries)
+        }
+    }
+
     /// Abort a pending session creation and clean up placeholder UI state.
     private func failPendingSessionCreation(placeholderId: String, errorMessage: String) {
         guard pendingLocalSessions.contains(placeholderId) else { return }

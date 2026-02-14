@@ -25,6 +25,7 @@ struct SessionDetailView: View {
     @State private var composerHeight: CGFloat = 0
     @State private var scrollToBottomAction: (() -> Void)?
     @State private var scrollPosition: UUID?
+    @State private var currentMessageIndex: Int?
 
     private var textEditorHeight: CGFloat {
         let uiFont = UIFont.preferredFont(forTextStyle: .body)
@@ -83,36 +84,16 @@ struct SessionDetailView: View {
             }
         }
         .overlay(alignment: .bottomTrailing) {
-            if shouldShowScrollToBottomButton {
-                Button {
-                    if #available(iOS 17.0, *) {
-                        if let lastId = sessionViewModel.chatMessages.last?.id {
-                            scrollPosition = lastId
-                            isAtBottom = true
-                        }
-                    } else {
-                        scrollToBottomAction?()
-                        isAtBottom = true
-                    }
-                } label: {
-                    if #available(iOS 26, *) {
-                        Image(systemName: "arrow.down")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(.primary)
-                            .padding(12)
-                            .glassEffect(.regular.interactive(), in: .circle)
-                    } else {
-                        Image(systemName: "arrow.down")
-                            .font(.system(size: 14, weight: .semibold))
-                            .foregroundStyle(.primary)
-                            .padding(10)
-                            .background(.ultraThinMaterial, in: Circle())
-                    }
+            MessageNavigationButtons(
+                chatMessages: sessionViewModel.chatMessages,
+                scrollPosition: $scrollPosition,
+                isAtBottom: isAtBottom,
+                scrollToBottomAction: scrollToBottomAction
+            )
+            .onChange(of: scrollPosition) { _, messageId in
+                if let id = messageId {
+                    currentMessageIndex = sessionViewModel.chatMessages.firstIndex { $0.id == id }
                 }
-                .padding(.trailing, 16)
-                .padding(.bottom, composerHeight + 24)
-                .accessibilityLabel("Scroll to bottom")
-                .zIndex(2)
             }
         }
         .sheet(isPresented: $showingWorkingDirectoryPicker) {
@@ -210,9 +191,6 @@ private extension SessionDetailView {
                 scrollViewHeight = height
             }
             .onChatContentMetricsChange { metrics in
-                if #available(iOS 17.0, *) {
-                    return
-                }
                 updateIsAtBottom(contentHeight: metrics.height, contentMinY: metrics.minY)
             }
             .onChange(of: scrollPosition) { newValue in

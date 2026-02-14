@@ -191,9 +191,6 @@ private extension SessionDetailView {
                 scrollViewHeight = height
             }
             .onChatContentMetricsChange { metrics in
-                if #available(iOS 17.0, *) {
-                    return
-                }
                 updateIsAtBottom(contentHeight: metrics.height, contentMinY: metrics.minY)
             }
             .onChange(of: scrollPosition) { newValue in

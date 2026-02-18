@@ -1727,8 +1727,14 @@ final class AppViewModel: ObservableObject, ACPClientManagerDelegate, ACPSession
         selectedServerViewModelAny?.fetchSessionList(force: force)
     }
 
-    /// Refresh sessions - reconnect if needed and fetch list.
+    /// Refresh sessions - verify connection health, reconnect if needed and fetch list.
     func refreshSessions() async {
+        // If we believe we're connected, verify the socket before issuing ACP requests.
+        // This handles stale connections where the state shows .connected but the socket is dead.
+        if connectionState == .connected {
+            await connectionManager.verifyConnectionHealth()
+        }
+
         if connectionState != .connected {
             let connected = await connectAndWait()
             guard connected else {

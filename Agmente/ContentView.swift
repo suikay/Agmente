@@ -620,12 +620,10 @@ private struct SessionListPage: View {
                     .frame(maxWidth: expanded ? .infinity : nil)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.black)
-            .foregroundStyle(.white)
             .controlSize(.large)
             .clipShape(UnevenRoundedRectangle(topLeadingRadius: 10, bottomLeadingRadius: 10, bottomTrailingRadius: 0, topTrailingRadius: 0))
             .accessibilityIdentifier("newSessionButton")
-            
+
             Menu {
                 Button {
                     guard model.connectionState == .connected else { return }
@@ -640,8 +638,6 @@ private struct SessionListPage: View {
                     .frame(width: 32, height: 44)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.black)
-            .foregroundStyle(.white)
             .controlSize(.large)
             .clipShape(UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 0, bottomTrailingRadius: 10, topTrailingRadius: 10))
             .accessibilityIdentifier("newSessionMenuButton")
@@ -659,12 +655,12 @@ private struct SessionListPage: View {
                     .font(.body.weight(.semibold))
                     .frame(maxWidth: expanded ? .infinity : nil)
                     .frame(height: 50)
-                    .background(.black)
+                    .background(Color.accentColor)
                     .foregroundStyle(.white)
                     .clipShape(UnevenRoundedRectangle(topLeadingRadius: 10, bottomLeadingRadius: 10, bottomTrailingRadius: 0, topTrailingRadius: 0))
             }
             .buttonStyle(.plain)
-            
+
             Menu {
                 Button {
                     guard model.connectionState == .connected else { return }
@@ -677,7 +673,7 @@ private struct SessionListPage: View {
                 Image(systemName: "chevron.down")
                     .font(.caption.weight(.semibold))
                     .frame(width: 50, height: 50)
-                    .background(.black)
+                    .background(Color.accentColor)
                     .foregroundStyle(.white)
                     .clipShape(UnevenRoundedRectangle(topLeadingRadius: 0, bottomLeadingRadius: 0, bottomTrailingRadius: 10, topTrailingRadius: 10))
             }

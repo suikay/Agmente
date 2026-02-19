@@ -65,7 +65,7 @@ struct MessageNavigationButtons: View {
         .padding(12)
         .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
         .padding(.trailing, 16)
-        .padding(.bottom, 24)
+        .padding(.bottom, 80) // Increased to avoid overlapping with input button area
     }
 
     // MARK: - Subviews

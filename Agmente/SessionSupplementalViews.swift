@@ -494,7 +494,6 @@ struct SessionCard: View {
                 }
             }
         }
-        }
     }
 }
 
